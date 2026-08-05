@@ -19,6 +19,10 @@ def embed_abstracts_tf_idf():
 
     So, each abstract is embedded in a vector with a number of elements equal to the length of the vocabulary (total number of words
     appearing in all abstracts). The embeddings of the abstracts are stored in a sparse matrix and saved in the npz format.
+
+    References
+    ----------
+        TfidfTransformer documentation: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfTransformer.html
     '''
     #create a list with all abstracts
     papers = pd.read_csv("data/all_papers.csv")
