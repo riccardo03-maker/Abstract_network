@@ -2,3 +2,4 @@
 py_trials.ipynb
 
 .vscode/
+networks/__pycache__
