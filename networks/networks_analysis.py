@@ -4,6 +4,7 @@
 from build_networks import build_adjacency_matrix
 import networkx as nx
 import pandas as pd
+import numpy as np
 
 __author__=['Riccardo Grandicelli']
 __email__=['riccardograndicelli03@gmail.com']
@@ -11,23 +12,22 @@ __email__=['riccardograndicelli03@gmail.com']
 
 def sweep_connected_components():
     '''
-    Starting from the embeddings of abstracts using tf-idf, this function builds 10 different networks, using as threshold distance ten
-    values in the range 0.001-0.01. Then, the number of connected components for each network are calculated, and the results stored
-    in a csv file.
-
-    Since we have 14986 connected components with the threshold 0.001, while a fully connected graph with the threshold 0.01, the aim
-    of this function is to find the optimal value of the threshold to have a number of connected components as close as possible to the
-    number of different topics in arxiv physics papers (22 topics).
+    Starting from the embeddings of abstracts using tf-idf, this function builds 20 different networks, using as threshold distance twenty
+    values in the range 0.0001-0.01. Then, the number of connected components for each network is calculated, as well as the size of
+    the largest component, and the results stored in a csv file.
     '''
-    connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components'])
+    connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
-    for threshold in [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01]:
+    for threshold in np.linspace(start = 0.0001, stop = 0.01, num = 20):
         adjacency_matrix = build_adjacency_matrix(threshold = threshold)
-        tf_idf_graph = nx.from_scipy_sparse_array(adjacency_matrix)
-        connected_components.loc[len(connected_components)] = [threshold, nx.number_connected_components(tf_idf_graph)]
+        abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
+    
+        connected_components.loc[len(connected_components)] = [threshold, nx.number_connected_components(abstract_network),
+                                                           max([len(c) for c in list(nx.connected_components(abstract_network))])]
         print("Iteration")
 
     connected_components.to_csv("networks/results/connected_components.csv")
+
 
 if(__name__ == '__main__'):
     sweep_connected_components()
