@@ -39,10 +39,9 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
         #apply the threshold on distance to create a row of the adjacency matrix
         adjacency_matrix_row = np.array(distance_matrix_row.toarray() < threshold, dtype = np.int32)
         adjacency_matrix[(i * 113):((i+1) * 113)] = adjacency_matrix_row
-        print(i)
 
-    save_npz(file = "networks/abstract_tfidf_adjacency_0_01.npz", matrix = adjacency_matrix.tocsr())
-
+    #save_npz(file = "networks/abstract_tfidf_adjacency_0_01.npz", matrix = adjacency_matrix.tocsr())
+    return adjacency_matrix
 
 if(__name__ == '__main__'):
     build_adjacency_matrix(threshold = 0.01)
