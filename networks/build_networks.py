@@ -44,4 +44,5 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
     return adjacency_matrix
 
 if(__name__ == '__main__'):
-    build_adjacency_matrix(threshold = 0.01)
+    adjacency_matrix = build_adjacency_matrix(threshold = 0.01)
+    save_npz(file = "networks/abstract_tfidf_adjacency_0_01.npz", matrix = adjacency_matrix.tocsr())
