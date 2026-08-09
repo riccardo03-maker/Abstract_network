@@ -38,11 +38,13 @@ def sweep_connected_components():
     connected_components.to_csv("networks/results/connected_components.csv")
 
 
-def degree_distribution():
+def centrality_measures():
     '''
-    Calculate the degree of each node in the network.
+    Calculate some centrality measures of each node in the network.
 
-    All the degrees are stored in a csv file, together with the topic of the paper (the primary cathegory if this is one of the "Physics"
+    In particular, this function calculates the degree and the clustering coefficient of each node.
+    
+    All the measures are stored in a csv file, together with the topic of the paper (the primary cathegory if this is one of the "Physics"
     topics, otherwise the secondary cathegory).
     '''
     #load network
@@ -54,11 +56,15 @@ def degree_distribution():
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
                else all_papers['secondary_cathegory'][i] for i in range(25877)]
 
+    #calculate clustering coefficient using networkx
+    G = nx.from_scipy_sparse_array(adjacency_matrix)
+    clustering_coefficients = list(nx.clustering(G).values())
+
     #merge everything in a dataset and save
-    data = {"Degree" : degree_distribution, "Topic" : topics_list}
+    data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, "Topic" : topics_list}
     dataset = pd.DataFrame(data = data)
-    dataset.to_csv("networks/results/degree_distribution.csv")
+    dataset.to_csv("networks/results/centrality_measures.csv")
 
 
 if(__name__ == '__main__'):
-    degree_distribution()
+    centrality_measures()
