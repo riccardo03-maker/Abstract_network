@@ -48,6 +48,35 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
     return adjacency_matrix
 
 
+def build_null_model(model: str):
+    '''
+    Build a network of the model specified as input, using the same number of nodes and links of the network built from the embeddings
+    of the paper abstracts.
+
+    The adjacency matrix of the new network of the specified model is saved in a npz file.
+
+    Parameters
+    ----------
+        model: {'random', 'scale_free'}
+            The name of the null model to use to build this network:
+                - Random: a random network built starting from N nodes and putting randomly M links, with N and M fixed.
+    '''
+    starting_network = nx.from_scipy_sparse_array(load_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz"))
+    #number of nodes and of links
+    N = len(starting_network)
+    M = starting_network.size()
+
+    if model == 'random':
+        G = nx.gnm_random_graph(N, M, seed = 42)
+    if model == 'scale_free':
+        print("Currently under development")
+        return None
+
+    adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
+    save_npz("networks/adjacency_matrices/" + model + "_network.npz", adjacency_matrix)
+
+
 if(__name__ == '__main__'):
-    adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
-    save_npz("networks/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
+    #adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
+    #save_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
+    build_null_model(model = 'random')
