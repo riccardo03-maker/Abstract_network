@@ -13,12 +13,14 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
     '''
     Create an adjacency matrix, starting from distance matrix between abstract embeddings.
 
-    The distance between vectors representing abstracts are calculated using cosine similarity. Since all vectors have been normalized
-    by the tf-idf transformer function, the distance between two vectors given by cosine similarity is equivalent to 
-    their scalar product.
+    The similarity between vectors representing abstracts are calculated using cosine similarity. Since all vectors have been normalized
+    by the tf-idf transformer function, the cosine similarity between two vectors is equivalent to their scalar product.
+    All similarity values are put in a matrix called distance matrix, where each entry represents the distance between two
+    abstract vectors. However, since we used the similarity as a score, a higher value means a lower distance between two
+    papers.
 
-    After the calculation of the distance matrix, all distances greater than the threshold distance given as input are converted
-    into 0, while lower distances are converted into 1. In this way the distance matrix is converted into the adjacency matrix of
+    After the calculation of the distance matrix, all values lower than the threshold distance given as input are converted
+    into 0, while higher values are converted into 1. In this way the distance matrix is converted into the adjacency matrix of
     a network.
 
     The adjacency matrix is saved in an npz format.
@@ -36,13 +38,16 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
         #calculate the scalar product of 113 embedded abstracts with all the others
         distance_matrix_row = abstract_embeddings[(i * 113):((i+1) * 113)] @ abstract_embeddings.T
 
-        #apply the threshold on distance to create a row of the adjacency matrix
-        adjacency_matrix_row = np.array(distance_matrix_row.toarray() < threshold, dtype = np.int32)
+        #apply the threshold on similarity to create a row of the adjacency matrix
+        adjacency_matrix_row = np.array(distance_matrix_row.toarray() > threshold, dtype = np.int32)
         adjacency_matrix[(i * 113):((i+1) * 113)] = adjacency_matrix_row
 
-    #save_npz(file = "networks/abstract_tfidf_adjacency_0_01.npz", matrix = adjacency_matrix.tocsr())
+    #since the similarity of a vector with itself is always 1, each node in the network has a link with itself (the diagonal elements
+    #of the adjacency matrix are all 1). So we set all diagonal elements to 0 to remove these links
+    adjacency_matrix.setdiag(0)
     return adjacency_matrix
 
+
 if(__name__ == '__main__'):
-    adjacency_matrix = build_adjacency_matrix(threshold = 0.01)
-    save_npz(file = "networks/abstract_tfidf_adjacency_0_01.npz", matrix = adjacency_matrix.tocsr())
+    adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
+    save_npz("networks/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())

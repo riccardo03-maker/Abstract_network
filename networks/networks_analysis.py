@@ -21,13 +21,13 @@ all_papers = pd.read_csv("data/all_papers.csv")
 
 def sweep_connected_components():
     '''
-    Starting from the embeddings of abstracts using tf-idf, this function builds 20 different networks, using as threshold distance twenty
-    values in the range 0.0001-0.01. Then, the number of connected components for each network is calculated, as well as the size of
+    Starting from the embeddings of abstracts using tf-idf, this function builds 20 different networks, using as threshold distance ten
+    values in the range 0.15-0.5. Then, the number of connected components for each network is calculated, as well as the size of
     the largest component, and the results stored in a csv file.
     '''
     connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
-    for threshold in np.linspace(start = 0.0001, stop = 0.01, num = 20):
+    for threshold in np.linspace(start = 0.15, stop = 0.5, num = 10):
         adjacency_matrix = build_adjacency_matrix(threshold = threshold)
         abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
     
@@ -46,7 +46,7 @@ def degree_distribution():
     topics, otherwise the secondary cathegory).
     '''
     #load network
-    adjacency_matrix = load_npz("networks/abstract_tfidf_adjacency_0_01.npz")
+    adjacency_matrix = load_npz("networks/abstract_tfidf_adjacency_0_2.npz")
     #calculate degree by summing rows (or columns, it is symmetric) of adjacency matrix
     degree_distribution = adjacency_matrix.sum(axis = 0)
 
