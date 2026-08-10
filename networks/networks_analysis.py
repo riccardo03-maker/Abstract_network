@@ -38,33 +38,43 @@ def sweep_connected_components():
     connected_components.to_csv("networks/results/connected_components.csv")
 
 
-def centrality_measures():
+def centrality_measures(network: str):
     '''
-    Calculate some centrality measures of each node in the network.
+    Calculate some centrality measures of each node in the network given as input.
 
-    In particular, this function calculates the degree and the clustering coefficient of each node.
+    In particular, this function calculates the degree, clustering coefficient and eigenvector centrality of each node.
     
     All the measures are stored in a csv file, together with the topic of the paper (the primary cathegory if this is one of the "Physics"
     topics, otherwise the secondary cathegory).
+
+    Parameters
+    ----------
+        network: str
+            The path to the file with the adjacency matrix of the network to be analyzed
     '''
     #load network
-    adjacency_matrix = load_npz("networks/abstract_tfidf_adjacency_0_2.npz")
+    adjacency_matrix = load_npz(network)
     #calculate degree by summing rows (or columns, it is symmetric) of adjacency matrix
     degree_distribution = adjacency_matrix.sum(axis = 0)
 
     #create list of topics
+    #this has no meaning if the network is built from a null model
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
                else all_papers['secondary_cathegory'][i] for i in range(25877)]
 
-    #calculate clustering coefficient using networkx
+    #calculate clustering coefficient and eigenvector centrality using networkx
     G = nx.from_scipy_sparse_array(adjacency_matrix)
     clustering_coefficients = list(nx.clustering(G).values())
+    eigenvector_centrality = list(nx.eigenvector_centrality(G).values())
 
     #merge everything in a dataset and save
-    data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, "Topic" : topics_list}
+    data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, 
+            "Eigenvector_centrality" : eigenvector_centrality, "Topic" : topics_list}
     dataset = pd.DataFrame(data = data)
-    dataset.to_csv("networks/results/centrality_measures.csv")
+
+    #save dataset in the same folder of the adjacency matrix
+    dataset.to_csv(network[::-1].split('/', 1)[1][::-1] + "/centrality_measures.csv")
 
 
 if(__name__ == '__main__'):
-    centrality_measures()
+    centrality_measures("networks/results/random_network/random_network.npz")
