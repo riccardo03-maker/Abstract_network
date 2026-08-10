@@ -42,7 +42,8 @@ def centrality_measures(network: str):
     '''
     Calculate some centrality measures of each node in the network given as input.
 
-    In particular, this function calculates the degree, clustering coefficient and eigenvector centrality of each node.
+    In particular, this function calculates the degree, clustering coefficient and eigenvector centrality of each node, as well as
+    the mean degree of the neighbours of each node.
     
     All the measures are stored in a csv file, together with the topic of the paper (the primary cathegory if this is one of the "Physics"
     topics, otherwise the secondary cathegory).
@@ -67,9 +68,12 @@ def centrality_measures(network: str):
     clustering_coefficients = list(nx.clustering(G).values())
     eigenvector_centrality = list(nx.eigenvector_centrality(G).values())
 
+    #calculate mean degree of nearest neighbours
+    knn = list(nx.average_neighbor_degree(G).values())
+
     #merge everything in a dataset and save
     data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, 
-            "Eigenvector_centrality" : eigenvector_centrality, "Topic" : topics_list}
+            "Eigenvector_centrality" : eigenvector_centrality, "Mean_degree_NN" : knn, "Topic" : topics_list}
     dataset = pd.DataFrame(data = data)
 
     #save dataset in the same folder of the adjacency matrix

@@ -73,10 +73,41 @@ def build_null_model(model: str):
         return None
 
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
-    save_npz("networks/adjacency_matrices/" + model + "_network.npz", adjacency_matrix)
+    save_npz("networks/results/" + model + "_network/" + model +"_network.npz", adjacency_matrix)
+
+
+def pendant_node_removal(network: str):
+    '''
+    Implement an algorithm that progressively removes all nodes of degree 0 and 1 from the chosen network.
+
+    At each iteration, all nodes with degree equal to 0 or 1 are removed from the network. The algorithm is repeated until no node has
+    remained or until all remaining nodes have degree greater or equal than 2. In the first case, a message tells that nothing has remained,
+    while in the second case the adjacency matrix of the remaining network is saved in a npz file.
+
+    Parameters
+    ----------
+        network: str
+            The path to the file with the adjacency matrix of the network to which the algorithm is applied  
+    '''
+    G = nx.from_scipy_sparse_array(load_npz(network))
+    nodes_last_iteration = 0
+    
+    while len(G) != nodes_last_iteration:
+        #register the number of nodes before the next removal step. If after the removal the number of nodes does not change,
+        #stop the cycle
+        nodes_last_iteration = len(G)
+
+        degree_list = list(G.degree)
+        G.remove_nodes_from([degree_list[index][0] for index, _ in enumerate(list(G.nodes)) if degree_list[index][1] in [0, 1]])
+
+    if len(G) == 0:
+        print("No nodes remained in the network after iterated pendant nodes removal")
+    else:
+        save_npz("networks/results/abstract_core/abstract_core.npz", nx.to_scipy_sparse_array(G, format = 'csr'))
 
 
 if(__name__ == '__main__'):
     #adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
     #save_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
-    build_null_model(model = 'random')
+    #build_null_model(model = 'random')
+    pendant_node_removal("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")
