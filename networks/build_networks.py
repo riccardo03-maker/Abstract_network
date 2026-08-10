@@ -50,7 +50,7 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
 
 def build_null_model(model: str):
     '''
-    Build a network of the model specified as input, using the same number of nodes and links of the network built from the embeddings
+    Build a network of the model specified as input, using the same number of nodes (N) and links (M) of the network built from the embeddings
     of the paper abstracts.
 
     The adjacency matrix of the new network of the specified model is saved in a npz file.
@@ -60,8 +60,11 @@ def build_null_model(model: str):
         model: {'random', 'scale_free'}
             The name of the null model to use to build this network:
                 - Random: a random network built starting from N nodes and putting randomly M links, with N and M fixed.
+                - Scale_free: a Barabasi-Albert network. At each time step in the building process a new node is added, and a number
+                    links equal to M/N is added to that node. The process is repeated until there are N nodes. If M/N is not integer,
+                    there could be less links with respect to the original network.
     '''
-    starting_network = nx.from_scipy_sparse_array(load_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz"))
+    starting_network = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
     #number of nodes and of links
     N = len(starting_network)
     M = starting_network.size()
@@ -69,8 +72,7 @@ def build_null_model(model: str):
     if model == 'random':
         G = nx.gnm_random_graph(N, M, seed = 42)
     if model == 'scale_free':
-        print("Currently under development")
-        return None
+        G = nx.barabasi_albert_graph(N, M // N, seed = 42)
 
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
     save_npz("networks/results/" + model + "_network/" + model +"_network.npz", adjacency_matrix)
@@ -109,5 +111,5 @@ def pendant_node_removal(network: str):
 if(__name__ == '__main__'):
     #adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
     #save_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
-    #build_null_model(model = 'random')
-    pendant_node_removal("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")
+    build_null_model(model = 'scale_free')
+    #pendant_node_removal("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")

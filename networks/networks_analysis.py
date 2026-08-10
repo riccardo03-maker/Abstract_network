@@ -81,4 +81,4 @@ def centrality_measures(network: str):
 
 
 if(__name__ == '__main__'):
-    centrality_measures("networks/results/random_network/random_network.npz")
+    centrality_measures("networks/results/scale_free_network/scale_free_network.npz")
