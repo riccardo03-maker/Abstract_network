@@ -105,11 +105,25 @@ def pendant_node_removal(network: str):
     if len(G) == 0:
         print("No nodes remained in the network after iterated pendant nodes removal")
     else:
-        save_npz("networks/results/abstract_core/abstract_core.npz", nx.to_scipy_sparse_array(G, format = 'csr'))
+        save_npz("networks/results/abstract_embeddings/abstract_core.npz", nx.to_scipy_sparse_array(G, format = 'csr'))
+
+
+def network_node_removal():
+    '''
+    Remove the three highest degree nodes from the abstract embeddings network, to see how robust is the network to the removal of
+    highest degree nodes.
+
+    The adjacency matrix of the new network without the three nodes is saved as a npz file.
+    '''
+    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    G.remove_nodes_from([17128, 10651, 9132]) #these are the only nodes with degree higher than 1000
+    adjacency_matrix = nx.to_scipy_sparse_array(G, format = "csr")
+    save_npz("networks/results/abstract_node_removal/abstract_node_removal.npz", adjacency_matrix)
 
 
 if(__name__ == '__main__'):
     #adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
     #save_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
-    build_null_model(model = 'scale_free')
+    #build_null_model(model = 'scale_free')
     #pendant_node_removal("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")
+    network_node_removal()

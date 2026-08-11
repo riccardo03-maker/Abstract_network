@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from .build_networks import build_adjacency_matrix
+from build_networks import build_adjacency_matrix
 import networkx as nx
 import pandas as pd
 import numpy as np
@@ -46,8 +46,7 @@ def centrality_measures(network: str):
     In particular, this function calculates the degree, clustering coefficient and eigenvector centrality of each node, as well as
     the mean degree of the neighbours of each node.
     
-    All the measures are stored in a csv file, together with the topic of the paper (the primary cathegory if this is one of the "Physics"
-    topics, otherwise the secondary cathegory).
+    All the measures are stored in a csv file.
 
     Parameters
     ----------
@@ -59,11 +58,6 @@ def centrality_measures(network: str):
     #calculate degree by summing rows (or columns, it is symmetric) of adjacency matrix
     degree_distribution = adjacency_matrix.sum(axis = 0)
 
-    #create list of topics
-    #this has no meaning if the network is built from a null model
-    topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
-               else all_papers['secondary_cathegory'][i] for i in range(25877)]
-
     #calculate clustering coefficient and eigenvector centrality using networkx
     G = nx.from_scipy_sparse_array(adjacency_matrix)
     clustering_coefficients = list(nx.clustering(G).values())
@@ -74,7 +68,7 @@ def centrality_measures(network: str):
 
     #merge everything in a dataset and save
     data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, 
-            "Eigenvector_centrality" : eigenvector_centrality, "Mean_degree_NN" : knn, "Topic" : topics_list}
+            "Eigenvector_centrality" : eigenvector_centrality, "Mean_degree_NN" : knn}
     dataset = pd.DataFrame(data = data)
 
     #save dataset in the same folder of the adjacency matrix
@@ -138,5 +132,5 @@ def split_fiedler_eigenvector():
 
 
 if(__name__ == '__main__'):
-    #centrality_measures("networks/results/scale_free_network/scale_free_network.npz")
-    split_fiedler_eigenvector()
+    centrality_measures("networks/results/scale_free_network/scale_free_network.npz")
+    #split_fiedler_eigenvector()
