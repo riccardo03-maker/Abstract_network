@@ -110,13 +110,13 @@ def pendant_node_removal(network: str):
 
 def network_node_removal():
     '''
-    Remove the three highest degree nodes from the abstract embeddings network, to see how robust is the network to the removal of
+    Remove the ten highest degree nodes from the abstract embeddings network, to see how robust is the network to the removal of
     highest degree nodes.
 
     The adjacency matrix of the new network without the three nodes is saved as a npz file.
     '''
     G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
-    G.remove_nodes_from([17128, 10651, 9132]) #these are the only nodes with degree higher than 1000
+    G.remove_nodes_from([17128, 10651, 9132, 16526, 9091, 12460, 3787, 20387, 16369, 2966]) #these are the nodes with higher degrees
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = "csr")
     save_npz("networks/results/abstract_node_removal/abstract_node_removal.npz", adjacency_matrix)
 

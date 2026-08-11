@@ -132,5 +132,5 @@ def split_fiedler_eigenvector():
 
 
 if(__name__ == '__main__'):
-    centrality_measures("networks/results/scale_free_network/scale_free_network.npz")
+    centrality_measures("networks/results/abstract_node_removal/abstract_node_removal.npz")
     #split_fiedler_eigenvector()
