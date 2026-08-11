@@ -72,7 +72,7 @@ def build_null_model(model: str):
     if model == 'random':
         G = nx.gnm_random_graph(N, M, seed = 42)
     if model == 'scale_free':
-        G = nx.barabasi_albert_graph(N, M // N, seed = 42)
+        G = nx.barabasi_albert_graph(N, (M // N) + 1, seed = 42)
 
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
     save_npz("networks/results/" + model + "_network/" + model +"_network.npz", adjacency_matrix)
