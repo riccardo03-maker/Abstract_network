@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import load_npz
 from scipy.sparse.linalg import eigsh
+import pickle
 
 __author__=['Riccardo Grandicelli']
 __email__=['riccardograndicelli03@gmail.com']
@@ -86,10 +87,7 @@ def split_fiedler_eigenvector():
     again the signs of the Fiedler eigenvector of that graph. This procedure is repeated until we have a total of 22 subgraphs (same
     number as the topics of physics papers).
 
-    Returns
-    -------
-        subgraphs_list: list of nx.Graph
-            List of subgraphs obtained through Fiedler eigenvector division.
+    The list of all subgraphs is saved in an external file.
     '''
     full_graph = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
 
@@ -98,6 +96,11 @@ def split_fiedler_eigenvector():
                else all_papers['secondary_cathegory'][i] for i in range(25877)]
     topics_dictionary = dict(zip(list(range(25877)), topics_list))
     nx.set_node_attributes(full_graph, topics_dictionary, name = "Topic")
+
+    #create list of titles and set them as node attributes
+    titles_list = [all_papers['title'][i] for i in range(25877)]
+    titles_dictionary = dict(zip(list(range(25877)), titles_list))
+    nx.set_node_attributes(full_graph, titles_dictionary, name = "Title")
 
     #keep only the largest component and remove the other nodes
     largest_component = max(nx.connected_components(full_graph), key=len)
@@ -128,9 +131,10 @@ def split_fiedler_eigenvector():
 
     #append the remaining subgraph to the list of subgraphs
     subgraphs_list.append(G_max)
-    return subgraphs_list
+    with open("networks/results/abstract_embeddings/fiedler_split", 'wb') as file:
+        pickle.dump(subgraphs_list, file)
 
 
 if(__name__ == '__main__'):
-    centrality_measures("networks/results/abstract_node_removal/abstract_node_removal.npz")
-    #split_fiedler_eigenvector()
+    #centrality_measures("networks/results/abstract_node_removal/abstract_node_removal.npz")
+    split_fiedler_eigenvector()
