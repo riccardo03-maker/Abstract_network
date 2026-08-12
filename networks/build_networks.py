@@ -121,9 +121,22 @@ def network_node_removal():
     save_npz("networks/results/abstract_node_removal/abstract_node_removal.npz", adjacency_matrix)
 
 
+def link_shuffling():
+    '''
+    Build a new network by randomly swapping the links of the original network from abstract tf-idf embeddings.
+
+    The adjacency matrix of the new network is saved in a npz file
+    '''
+    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    G = nx.random_reference(G, seed = 42, connectivity = False)
+    adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
+    save_npz("networks/results/link_shuffle/link_shuffle.npz", adjacency_matrix)
+
+
 if(__name__ == '__main__'):
     #adjacency_matrix = build_adjacency_matrix(threshold = 0.2)
     #save_npz("networks/adjacency_matrices/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
     #build_null_model(model = 'scale_free')
     #pendant_node_removal("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")
-    network_node_removal()
+    #network_node_removal()
+    link_shuffling()
