@@ -76,6 +76,42 @@ def centrality_measures(network: str):
     dataset.to_csv(network[::-1].split('/', 1)[1][::-1] + "/centrality_measures.csv")
 
 
+def connectivity_between_cathegories():
+    '''
+    Create a 22 x 22 matrix, where each row and each column represent one of the 22 cathegories of physics papers, and the entries
+    are the number of links in the network between nodes belonging to the two cathegories. So the matrix is symmetric, and the
+    diagonal elements are the links between papers of the same cathegory.
+
+    The matrix is saved as a dataset in an external csv file, together with a column representing the number of papers of each
+    cathegory.
+    '''
+    # create the graph and the 22 x 22 matrix
+    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    connectivity_matrix = np.zeros(shape = (22, 22), dtype = np.int32)
+
+    #create list of topics and set them as node attributes
+    topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
+               else all_papers['secondary_cathegory'][i] for i in range(25877)]
+    topics_dictionary = dict(zip(list(range(25877)), topics_list))
+    nx.set_node_attributes(G, topics_dictionary, name = "Topic")
+
+    #create a list for the number of papers for each cathegory
+    papers_for_cathegory = []
+
+    for i, first_topic in enumerate(all_physics_topics):
+        papers_for_cathegory.append(len([node for node in list(G.nodes) if G.nodes[node]["Topic"] == first_topic]))
+
+        for j, second_topic in enumerate(all_physics_topics):
+            edges = [edge for edge in list(G.edges) if G.nodes[edge[0]]["Topic"] == first_topic and 
+                   G.nodes[edge[1]]["Topic"] == second_topic]
+            connectivity_matrix[i][j] = len(edges)
+
+    connections_between_cathegories = pd.DataFrame(data = connectivity_matrix, index = all_physics_topics, columns = all_physics_topics)
+    connections_between_cathegories.insert(loc = len(connections_between_cathegories), column = "Number_of_papers",
+                                           value = papers_for_cathegory)
+    connections_between_cathegories.to_csv("networks/results/connections_between_cathegories.csv")
+
+
 def split_fiedler_eigenvector():
     '''
     Divide the abstract embeddings graph into communities using the sign of the components of the Fiedler eigenvector.
@@ -137,4 +173,5 @@ def split_fiedler_eigenvector():
 
 if(__name__ == '__main__'):
     #centrality_measures("networks/results/abstract_node_removal/abstract_node_removal.npz")
-    split_fiedler_eigenvector()
+    #split_fiedler_eigenvector()
+    connectivity_between_cathegories()
