@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from scipy.sparse import load_npz
 from scipy.sparse.linalg import eigsh
+from sklearn.cluster import KMeans
 import pickle
 
 __author__=['Riccardo Grandicelli']
@@ -146,7 +147,7 @@ def split_fiedler_eigenvector():
     G_max = G
     for _ in range(21): #after N iterations we have N+1 subgraphs
         #create fiedler eigenvector
-        laplacian_matrix = nx.laplacian_matrix(G_max).tocsr()
+        laplacian_matrix = nx.laplacian_matrix(G_max)
         _, evecs = eigsh(laplacian_matrix, k = 2, which ='SM', tol = 1e-6)
         fiedler_vector = evecs[:, 1]
 
@@ -167,11 +168,97 @@ def split_fiedler_eigenvector():
 
     #append the remaining subgraph to the list of subgraphs
     subgraphs_list.append(G_max)
+
+    #save the list of subgraphs
     with open("networks/results/abstract_embeddings/fiedler_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
+
+
+def split_k_means():
+    '''
+    Split the network built from abstract tf-idf embeddings into clusters using K-Means clustering.
+
+    First, the nodes that do not belong to the largest connected component are removed. Then, the first 30 eigenvectors of the
+    Laplacian matrix of the remaining network are calculated and their components used as features for network nodes (30 features for
+    node). After that, a K-Means clustering algorithm (with K = 22) is used to divide the network into 22 clusters.
+
+    The list of all 22 subgraphs induced with this algorithm is saved in an external file.
+    '''
+    full_graph = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+
+    #create list of topics and set them as node attributes
+    topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
+                    else all_papers['secondary_cathegory'][i] for i in range(25877)]
+    topics_dictionary = dict(zip(list(range(25877)), topics_list))
+    nx.set_node_attributes(full_graph, topics_dictionary, name = "Topic")
+
+    #create list of titles and set them as node attributes
+    titles_list = [all_papers['title'][i] for i in range(25877)]
+    titles_dictionary = dict(zip(list(range(25877)), titles_list))
+    nx.set_node_attributes(full_graph, titles_dictionary, name = "Title")
+
+    #keep only the largest component and remove the other nodes
+    largest_component = max(nx.connected_components(full_graph), key=len)
+    G = full_graph.subgraph(largest_component).copy()
+
+    #create laplacian matrix and calculate eigenvalues and eigenvectors
+    laplacian_matrix = nx.laplacian_matrix(G)
+    _, evecs = eigsh(laplacian_matrix, k = 30, which ='SM', tol = 1e-6)
+
+    kmeans = KMeans(n_clusters = 22, random_state = 42)
+    kmeans.fit(evecs)
+
+    #create the list of subgraphs
+    subgraphs_list = []
+    for i in range(22):
+        subgraph_nodes = [node for index, node in enumerate(list(G.nodes)) if kmeans.labels_[index] == i]
+        subgraph = G.subgraph(subgraph_nodes).copy()
+        subgraphs_list.append(subgraph)
+
+    #save the list of subgraphs
+    with open("networks/results/abstract_embeddings/k_means_split", 'wb') as file:
+        pickle.dump(subgraphs_list, file)
+
+
+def split_louvain_method():
+    '''
+    Split the network built from abstract tf-idf embeddings using the Louvain method.
+
+    First, the nodes that do not belong to the largest connected component are removed. Then, the Luovain method is applied as
+    explained in the networkx documentation.
+
+    The list with all subgraphs induced with this algorithm is saved in an external file.
+
+    References
+    ----------
+        Networkx documentation louvain_communities: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html
+    '''
+    full_graph = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+
+    #create list of topics and set them as node attributes
+    topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
+                    else all_papers['secondary_cathegory'][i] for i in range(25877)]
+    topics_dictionary = dict(zip(list(range(25877)), topics_list))
+    nx.set_node_attributes(full_graph, topics_dictionary, name = "Topic")
+
+    #create list of titles and set them as node attributes
+    titles_list = [all_papers['title'][i] for i in range(25877)]
+    titles_dictionary = dict(zip(list(range(25877)), titles_list))
+    nx.set_node_attributes(full_graph, titles_dictionary, name = "Title")
+
+    #keep only the largest component and remove the other nodes
+    largest_component = max(nx.connected_components(full_graph), key=len)
+    G = full_graph.subgraph(largest_component).copy()
+
+    subgraphs_list = nx.community.louvain_communities(G, seed = 42)
+
+    #save the list of subgraphs
+    with open("networks/results/abstract_embeddings/louvain_split", 'wb') as file:
+        pickle.dump(subgraphs_list, file)   
 
 
 if(__name__ == '__main__'):
     #centrality_measures("networks/results/abstract_node_removal/abstract_node_removal.npz")
     #split_fiedler_eigenvector()
-    connectivity_between_cathegories()
+    split_k_means()
+    split_louvain_method()
