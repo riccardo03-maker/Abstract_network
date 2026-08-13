@@ -2,3 +2,6 @@ numpy
 scipy
 networkx
 pandas
+scikit-learn
+transformers
+torch
