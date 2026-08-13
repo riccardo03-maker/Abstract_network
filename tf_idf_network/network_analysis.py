@@ -24,7 +24,7 @@ all_papers = pd.read_csv("data/all_papers.csv")
 
 def sweep_connected_components():
     '''
-    Starting from the embeddings of abstracts using tf-idf, this function builds 20 different networks, using as threshold distance ten
+    Starting from the embeddings of abstracts using tf-idf, this function builds ten different networks, using as threshold distance ten
     values in the range 0.15-0.5. Then, the number of connected components for each network is calculated, as well as the size of
     the largest component, and the results stored in a csv file.
     '''
@@ -38,7 +38,7 @@ def sweep_connected_components():
                                                            max([len(c) for c in list(nx.connected_components(abstract_network))])]
         print("Iteration")
 
-    connected_components.to_csv("networks/results/connected_components.csv")
+    connected_components.to_csv("tf_idf_network/results/connected_components.csv")
 
 
 def centrality_measures(network: str):
@@ -87,7 +87,7 @@ def connectivity_between_cathegories():
     cathegory.
     '''
     # create the graph and the 22 x 22 matrix
-    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    G = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
     connectivity_matrix = np.zeros(shape = (22, 22), dtype = np.int32)
 
     #create list of topics and set them as node attributes
@@ -110,7 +110,7 @@ def connectivity_between_cathegories():
     connections_between_cathegories = pd.DataFrame(data = connectivity_matrix, index = all_physics_topics, columns = all_physics_topics)
     connections_between_cathegories.insert(loc = len(connections_between_cathegories), column = "Number_of_papers",
                                            value = papers_for_cathegory)
-    connections_between_cathegories.to_csv("networks/results/connections_between_cathegories.csv")
+    connections_between_cathegories.to_csv("tf_idf_network/results/connections_between_cathegories.csv")
 
 
 def split_fiedler_eigenvector():
@@ -126,7 +126,7 @@ def split_fiedler_eigenvector():
 
     The list of all subgraphs is saved in an external file.
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -170,7 +170,7 @@ def split_fiedler_eigenvector():
     subgraphs_list.append(G_max)
 
     #save the list of subgraphs
-    with open("networks/results/abstract_embeddings/fiedler_split", 'wb') as file:
+    with open("tf_idf_network/results/abstract_embeddings/fiedler_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -184,7 +184,7 @@ def split_k_means():
 
     The list of all 22 subgraphs induced with this algorithm is saved in an external file.
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -216,7 +216,7 @@ def split_k_means():
         subgraphs_list.append(subgraph)
 
     #save the list of subgraphs
-    with open("networks/results/abstract_embeddings/k_means_split", 'wb') as file:
+    with open("tf_idf_network/results/abstract_embeddings/k_means_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -233,7 +233,7 @@ def split_louvain_method():
     ----------
         Networkx documentation louvain_communities: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -253,7 +253,7 @@ def split_louvain_method():
     subgraphs_list = nx.community.louvain_communities(G, seed = 42)
 
     #save the list of subgraphs
-    with open("networks/results/abstract_embeddings/louvain_split", 'wb') as file:
+    with open("tf_idf_network/results/abstract_embeddings/louvain_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)   
 
 
