@@ -10,8 +10,8 @@ from scipy.sparse.linalg import eigsh
 from sklearn.cluster import KMeans
 import pickle
 
-__author__=['Riccardo Grandicelli']
-__email__=['riccardograndicelli03@gmail.com']
+__author__= ['Riccardo Grandicelli']
+__email__= ['riccardograndicelli03@gmail.com']
 
 
 all_physics_topics = ["Accelerator Physics", "Applied Physics", "Atmospheric and Oceanic Physics", "Atomic and Molecular Clusters", 

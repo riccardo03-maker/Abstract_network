@@ -5,8 +5,8 @@ from scipy.sparse import load_npz, csr_array, lil_array, save_npz
 import numpy as np
 import networkx as nx
 
-__author__=['Riccardo Grandicelli']
-__email__=['riccardograndicelli03@gmail.com']
+__author__= ['Riccardo Grandicelli']
+__email__= ['riccardograndicelli03@gmail.com']
 
 
 def build_adjacency_matrix(threshold: float) -> csr_array:

@@ -5,8 +5,8 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from scipy.sparse import save_npz
 
-__author__=['Riccardo Grandicelli']
-__email__=['riccardograndicelli03@gmail.com']
+__author__= ['Riccardo Grandicelli']
+__email__= ['riccardograndicelli03@gmail.com']
 
 
 def embed_abstracts_tf_idf():
