@@ -3,4 +3,6 @@ old_analysis.ipynb
 
 
 .vscode/
-networks/__pycache__
+scibert_network/__pycache__
+tf_idf_network/__pycache__
+.ipynb_checkpoints
