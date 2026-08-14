@@ -4,6 +4,7 @@
 from scipy.sparse import load_npz, csr_array, lil_array, save_npz
 import numpy as np
 import networkx as nx
+from sklearn.metrics.pairwise import cosine_similarity
 
 __author__= ['Riccardo Grandicelli']
 __email__= ['riccardograndicelli03@gmail.com']
@@ -35,11 +36,12 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
     #25877 = 113 * 229, so we iterate 229 times and at each iteration consider 113 titles
     for i in range(229):
         #calculate the scalar product of 113 embedded titles with all the others
-        distance_matrix_row = title_embeddings[(i * 113):((i+1) * 113)] @ title_embeddings.T
+        distance_matrix_row = cosine_similarity(title_embeddings[(i * 113):((i+1) * 113)], title_embeddings)
 
         #apply the threshold on similarity to create a row of the adjacency matrix
         adjacency_matrix_row = np.array(distance_matrix_row > threshold, dtype = np.int32)
         adjacency_matrix[(i * 113):((i+1) * 113)] = adjacency_matrix_row
+        print(i)
 
     #since the similarity of a vector with itself is always 1, each node in the network has a link with itself (the diagonal elements
     #of the adjacency matrix are all 1). So we set all diagonal elements to 0 to remove these links

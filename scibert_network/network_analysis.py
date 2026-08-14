@@ -24,13 +24,13 @@ all_papers = pd.read_csv("data/all_papers.csv")
 
 def sweep_connected_components():
     '''
-    Starting from the embeddings of titles using SciBERT, this function builds ten different networks, using as threshold distance ten
-    values in the range 0.15-0.5. Then, the number of connected components for each network is calculated, as well as the size of
+    Starting from the embeddings of titles using SciBERT, this function builds ten different networks, using as threshold distance five
+    values in the range 0.8-0.9. Then, the number of connected components for each network is calculated, as well as the size of
     the largest component, and the results stored in a csv file.
     '''
     connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
-    for threshold in np.linspace(start = 0.15, stop = 0.5, num = 10):
+    for threshold in np.linspace(start = 0.8, stop = 0.9, num = 5):
         adjacency_matrix = build_adjacency_matrix(threshold = threshold)
         abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
     
@@ -38,7 +38,7 @@ def sweep_connected_components():
                                                            max([len(c) for c in list(nx.connected_components(abstract_network))])]
         print("Iteration")
 
-    connected_components.to_csv("scibert_network/results/connected_components.csv")
+    connected_components.to_csv("scibert_network/results/title_embeddings/connected_components.csv")
 
 
 def centrality_measures(network: str):
