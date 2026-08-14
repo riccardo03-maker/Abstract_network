@@ -65,7 +65,7 @@ def build_null_model(model: str):
                     links equal to M/N is added to that node. The process is repeated until there are N nodes. If M/N is not integer,
                     there could be less links with respect to the original network.
     '''
-    starting_network = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    starting_network = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz"))
     #number of nodes and of links
     N = len(starting_network)
     M = starting_network.size()
@@ -76,23 +76,18 @@ def build_null_model(model: str):
         G = nx.barabasi_albert_graph(N, (M // N) + 1, seed = 42)
 
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
-    save_npz("networks/results/" + model + "_network/" + model +"_network.npz", adjacency_matrix)
+    save_npz("scibert_network/results/" + model + "_network/" + model +"_network.npz", adjacency_matrix)
 
 
-def pendant_node_removal(network: str):
+def pendant_node_removal():
     '''
-    Implement an algorithm that progressively removes all nodes of degree 0 and 1 from the chosen network.
+    Implement an algorithm that progressively removes all nodes of degree 0 and 1 from the network of titles embedded using SciBERT.
 
     At each iteration, all nodes with degree equal to 0 or 1 are removed from the network. The algorithm is repeated until no node has
     remained or until all remaining nodes have degree greater or equal than 2. In the first case, a message tells that nothing has remained,
     while in the second case the adjacency matrix of the remaining network is saved in a npz file.
-
-    Parameters
-    ----------
-        network: str
-            The path to the file with the adjacency matrix of the network to which the algorithm is applied  
     '''
-    G = nx.from_scipy_sparse_array(load_npz(network))
+    G = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz"))
     nodes_last_iteration = 0
     
     while len(G) != nodes_last_iteration:
@@ -106,7 +101,7 @@ def pendant_node_removal(network: str):
     if len(G) == 0:
         print("No nodes remained in the network after iterated pendant nodes removal")
     else:
-        save_npz("networks/results/abstract_embeddings/abstract_core.npz", nx.to_scipy_sparse_array(G, format = 'csr'))
+        save_npz("scibert_network/results/title_embeddings/title_core.npz", nx.to_scipy_sparse_array(G, format = 'csr'))
 
 
 def network_node_removal():
@@ -116,28 +111,28 @@ def network_node_removal():
 
     The adjacency matrix of the new network without the three nodes is saved as a npz file.
     '''
-    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
-    G.remove_nodes_from([17128, 10651, 9132, 16526, 9091, 12460, 3787, 20387, 16369, 2966]) #these are the nodes with higher degrees
+    G = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz"))
+    G.remove_nodes_from([15742, 5626, 17589, 3296, 17902, 25831, 1176, 7673, 95, 17075]) #these are the nodes with higher degrees
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = "csr")
-    save_npz("networks/results/abstract_node_removal/abstract_node_removal.npz", adjacency_matrix)
+    save_npz("scibert_network/results/title_node_removal/title_node_removal.npz", adjacency_matrix)
 
 
 def link_shuffling():
     '''
-    Build a new network by randomly swapping the links of the original network from abstract tf-idf embeddings.
+    Build a new network by randomly swapping the links of the original network from titles embedded using SciBERT.
 
     The adjacency matrix of the new network is saved in a npz file
     '''
-    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    G = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz"))
     G = nx.random_reference(G, seed = 42, connectivity = False)
     adjacency_matrix = nx.to_scipy_sparse_array(G, format = 'csr')
-    save_npz("networks/results/link_shuffle/link_shuffle.npz", adjacency_matrix)
+    save_npz("scibert_network/results/link_shuffle/link_shuffle.npz", adjacency_matrix)
 
 
 if(__name__ == '__main__'):
-    adjacency_matrix = build_adjacency_matrix(threshold = 0.7)
-    save_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_5.npz", matrix = adjacency_matrix.tocsr())
-    #build_null_model(model = 'scale_free')
-    #pendant_node_removal("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")
-    #network_node_removal()
+    #adjacency_matrix = build_adjacency_matrix(threshold = 0.85)
+    #save_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz", matrix = adjacency_matrix.tocsr())
+    #build_null_model(model = 'random')
+    #pendant_node_removal()
+    network_node_removal()
     #link_shuffling()
