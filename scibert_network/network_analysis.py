@@ -259,7 +259,7 @@ def split_louvain_method():
 
 if(__name__ == '__main__'):
     #sweep_connected_components()
-    centrality_measures("scibert_network/results/title_node_removal/title_node_removal.npz")
+    centrality_measures("scibert_network/results/link_shuffle/link_shuffle.npz")
     #split_fiedler_eigenvector()
     #split_k_means()
     #split_louvain_method()
