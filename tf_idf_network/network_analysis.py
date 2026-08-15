@@ -224,7 +224,7 @@ def split_louvain_method():
     '''
     Split the network built from abstract tf-idf embeddings using the Louvain method.
 
-    First, the nodes that do not belong to the largest connected component are removed. Then, the Luovain method is applied as
+    First, the nodes that do not belong to the largest connected component are removed. Then, the Louvain method is applied as
     explained in the networkx documentation.
 
     The list with all subgraphs induced with this algorithm is saved in an external file.
