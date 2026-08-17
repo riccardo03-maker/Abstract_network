@@ -3,6 +3,7 @@
 
 import pandas as pd
 from collections import Counter
+import subprocess
 
 __author__= ['Riccardo Grandicelli']
 __email__= ['riccardograndicelli03@gmail.com']
@@ -18,10 +19,7 @@ all_papers = pd.read_csv("data/all_papers.csv")
 
 def table_of_cathegories():
     '''
-    Create a table with all the cathegories of papers used for the analysis, and for each cathegory the number of papers belonging
-    to it.
-
-    The table is stored in a csv file 
+    Create the first table of the report. 
     '''
     #create list of cathegories, using the second cathegory when the first one is not a Physics cathegory
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -33,5 +31,12 @@ def table_of_cathegories():
     papers_cathegories_data.to_csv("tables/table_1.csv")
 
 
+def table_connected_components_tf_idf():
+    '''
+    Create the second table of the report.
+    '''
+    subprocess.run("cp tf_idf_network/results/abstract_embeddings/connected_components.csv tables/table_2.csv", shell = True)
+
+
 if(__name__ == '__main__'):
-    table_of_cathegories()
+    table_connected_components_tf_idf()
