@@ -15,11 +15,11 @@ ggsave("plots/figure_2/degree_distribution_link_shuffling.png", plot = plot, wid
 #plot mean degree nn vs degree
 plot <- ggplot(data = centrality_measures, aes(x = Degree, y = Mean_degree_NN)) +
     geom_point(color = "orange") +
-    labs(title = "Mean degree nearest neighbours tf-idf network", x = "Degree", y = "Mean degree NN")
+    labs(title = "Mean degree nearest neighbours link shuffling", x = "Degree", y = "Mean degree NN")
 ggsave("plots/figure_2/mean_degree_nn_link_shuffling.png", plot = plot, width = 6.67, height = 6.67)    
 
 #plot clustering coefficient vs degree
 plot <- ggplot(data = centrality_measures, aes(x = Degree, y = Clustering_coefficient)) +
     geom_point(color = "red") +
-    labs(title = "Clustering coefficients tf-idf network", x = "Degree", y = "Clustering coefficient")
+    labs(title = "Clustering coefficients link shuffling", x = "Degree", y = "Clustering coefficient")
 ggsave("plots/figure_2/clustering_coefficient_link_shuffling.png", plot = plot, width = 6.67, height = 6.67)
