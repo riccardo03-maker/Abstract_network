@@ -9,6 +9,7 @@ from scipy.sparse import load_npz
 from scipy.sparse.linalg import eigsh
 from sklearn.cluster import KMeans
 import pickle
+from collections import Counter
 
 __author__= ['Riccardo Grandicelli']
 __email__= ['riccardograndicelli03@gmail.com']
@@ -250,15 +251,65 @@ def split_louvain_method():
     largest_component = max(nx.connected_components(full_graph), key=len)
     G = full_graph.subgraph(largest_component).copy()
 
-    subgraphs_list = nx.community.louvain_communities(G, seed = 42)
+    communities_list = nx.community.louvain_communities(G, seed = 42)
+
+    #the list obtained with the Louvain algorithm contains just the nodes of each subgraph. Now we need to create the
+    #subgraphs starting from these nodes.
+    subgraphs_list = []
+    for community in communities_list:
+        subgraphs_list.append(G.subgraph(community).copy())
 
     #save the list of subgraphs
     with open("tf_idf_network/results/abstract_embeddings/louvain_split", 'wb') as file:
-        pickle.dump(subgraphs_list, file)   
+        pickle.dump(subgraphs_list, file)
+
+
+def cathegories_by_community(split_method: str):
+    '''
+    Create a table where each row is one of the communities obtained using the input algorithm, the columns are the cathegories 
+    of Physics papers and each entry is the number of papers of a certain cathegory in a certain community.
+
+    The table is saved in a csv file.
+
+    Parameters
+    ----------
+        split_method: {'fiedler', 'kmeans', 'louvain'}
+            The method used to obtain the division of the network into communities
+    '''
+    cathegories_by_community = pd.DataFrame(columns = all_physics_topics)
+
+    if split_method == 'fiedler':
+        subgraphs_list_path = "tf_idf_network/results/abstract_embeddings/fiedler_split"
+    elif split_method == 'kmeans':
+        subgraphs_list_path = "tf_idf_network/results/abstract_embeddings/k_means_split"
+    elif split_method == 'louvain':    
+        subgraphs_list_path = "tf_idf_network/results/abstract_embeddings/louvain_split"
+
+    #load subgraphs
+    with open(subgraphs_list_path, "rb") as file:
+        subgraphs_list = pickle.load(file)
+
+    for community in subgraphs_list:
+        topics_of_community = nx.get_node_attributes(community, "Topic")
+        number_of_papers_per_topic = dict(Counter(list(topics_of_community.values())))
+        list_number_of_papers_per_topic = []
+
+        for cathegory in all_physics_topics:
+            #count the number of nodes of each cathegory in the community
+            if cathegory not in number_of_papers_per_topic.keys():
+                list_number_of_papers_per_topic.append(0)
+            else:
+                list_number_of_papers_per_topic.append(number_of_papers_per_topic[cathegory])
+
+        #put the number of papers of each topic for a community as a row in the dataset
+        cathegories_by_community.loc[len(cathegories_by_community)] = list_number_of_papers_per_topic
+
+    cathegories_by_community.to_csv("tf_idf_network/results/cathegories_by_community_" + split_method + ".csv")
 
 
 if(__name__ == '__main__'):
-    centrality_measures("networks/results/link_shuffle/link_shuffle.npz")
+    #centrality_measures("networks/results/link_shuffle/link_shuffle.npz")
     #split_fiedler_eigenvector()
     #split_k_means()
     #split_louvain_method()
+    cathegories_by_community('louvain')
