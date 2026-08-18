@@ -39,7 +39,7 @@ def table_connected_components_tf_idf():
     subprocess.run("cp tf_idf_network/results/abstract_embeddings/connected_components.csv tables/table_2.csv", shell = True)
 
 
-def table_of_cathegories_by_community():
+def table_of_cathegories_by_community_tf_idf():
     '''
     Create the fourth table of the report
     '''
@@ -66,6 +66,30 @@ def table_of_cathegories_by_community():
     cathegories_by_community_data.to_csv("tables/table_4.csv")
 
 
+def table_connected_components_scibert():
+    '''
+    Create the fifth table of the report.
+    '''
+    subprocess.run("cp scibert_network/results/title_embeddings/connected_components.csv tables/table_5.csv", shell = True)
+
+
+def table_of_cathegories_by_community_scibert():
+    '''
+    Create the seventh table of the report
+    '''
+    #open list of communities obtained with Louvain algorithm
+    with open("scibert_network/results/title_embeddings/louvain_split", 'rb') as file:
+        louvain_subgraphs_list = pickle.load(file)
+
+    #count the number of papers in each community
+    louvain_cathegories_by_community = [len(community) for community in louvain_subgraphs_list]
+
+    #create the dataset: each row is a community, and each column is an algorithm
+    cathegories_by_community_dict = {"Louvain" : louvain_cathegories_by_community}
+    cathegories_by_community_data = pd.DataFrame(data = cathegories_by_community_dict)
+    cathegories_by_community_data.to_csv("tables/table_7.csv")
+
+
 if(__name__ == '__main__'):
-    #table_connected_components_tf_idf()
-    table_of_cathegories_by_community()
+    #table_connected_components_scibert()
+    table_of_cathegories_by_community_scibert()
