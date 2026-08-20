@@ -16,7 +16,19 @@ all_physics_topics = ["Accelerator Physics", "Applied Physics", "Atmospheric and
                       "History and Philosophy of Physics", "Instrumentation and Detectors", "Medical Physics", "Optics",
                         "Physics and Society", "Physics Education", "Plasma Physics", "Popular Physics", "Space Physics"]
 
+
 def download_papers():
+    '''
+    Download from arXiv the papers used for the analysis. The IDs of papers used are provided in 13 Python lists, saved in the 
+    folder "data/list_of_papers".
+
+    For each paper, title, authors and abstract are downloaded, together with the primary and secondary cathegory. The primary
+    cathegory is the one reported in bold characters in the arXiv page of the paper. The secondary cathegory is the first cathegory
+    belonging to the Physics archive among those that are not written in bold characters. If the paper has only one cathegory, or
+    if no secondary cathegory belongs to the Physics archive, the secondary cathegory is just identical to the primary cathegory.
+
+    All papers downloaded in this way are saved in the csv file "data/all_papers.csv".
+    '''
     papers = pd.DataFrame(columns = ['paper', 'authors', 'title', 'abstract', 'primary_cathegory', 'secondary_cathegory'])
 
     for i in range(13):

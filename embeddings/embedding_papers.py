@@ -16,12 +16,13 @@ def embed_abstracts_tf_idf():
     '''
     Transform the abstracts of all papers into vectors, using the term frequency-inverse document frequency method.
 
-    First, this function counts, for eachone of the words in all abstracts, how many times it appears in each abstract. Words that
+    First, this function counts, for each one of the words in all abstracts, how many times it appears in each abstract. Words that
     contain a number or a '_' are not considered. Then, for each word the tf-idf score in each abstract is calculated, using the formula
-    specified in the TfidfTrasformer documentation of scikit-learn.
+    specified in the TfidfTrasformer documentation of the scikit-learn package.
 
-    So, each abstract is embedded in a vector with a number of elements equal to the length of the vocabulary (total number of words
-    appearing in all abstracts). The embeddings of the abstracts are stored in a sparse matrix and saved in the npz format.
+    So, each abstract is embedded in a vector with a number of elements equal to the length of the vocabulary (total number 
+    of words appearing in all abstracts). The embeddings of the abstracts are stored in a sparse matrix and saved in the 
+    npz file "embeddings/abstract_embeddings_tfidf.npz".
 
     References
     ----------
@@ -43,7 +44,7 @@ def embed_abstracts_tf_idf():
     X = vectorizer.fit_transform(list_of_abstracts)
     transformer = TfidfTransformer()
     abstract_embeddings = transformer.fit_transform(X)
-    save_npz(file = "embeddings/abstract_embeddings_tfidf", matrix = abstract_embeddings)
+    save_npz(file = "embeddings/abstract_embeddings_tfidf.npz", matrix = abstract_embeddings)
 
 
 def embed_titles_scibert():
@@ -53,7 +54,7 @@ def embed_titles_scibert():
     Each word of each title is embedded in a 784-dimensional vector. Then, the mean of the single-word embeddings is taken for each 
     title, in order to obtain a single vector for each paper.
 
-    The embeddings of titles are saved as numpy arrays in a npz file.
+    The embeddings of titles are saved as numpy arrays in the npz file "embeddings/title_embeddings_scibert.npz".
 
     References
     ----------

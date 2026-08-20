@@ -25,9 +25,10 @@ all_papers = pd.read_csv("data/all_papers.csv")
 
 def sweep_connected_components():
     '''
-    Starting from the embeddings of abstracts using tf-idf, this function builds ten different networks, using as threshold distance ten
-    values in the range 0.15-0.5. Then, the number of connected components for each network is calculated, as well as the size of
-    the largest component, and the results stored in a csv file.
+    Starting from the embeddings of paper abstracts using tf-idf, this function builds ten different networks, using as threshold 
+    distance ten values in the range 0.15-0.5. Then, the number of connected components for each network is calculated, as well as
+    the size of the largest component, and the results stored in the csv file
+    "tf_idf_network/results/connected_components.csv".
     '''
     connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
@@ -46,10 +47,11 @@ def centrality_measures(network: str):
     '''
     Calculate some centrality measures of each node in the network given as input.
 
-    In particular, this function calculates the degree, clustering coefficient and eigenvector centrality of each node, as well as
-    the mean degree of the neighbours of each node.
+    In particular, this function calculates the degree and clustering coefficient of each node, as well as the mean degree of the 
+    neighbours of each node.
     
-    All the measures are stored in a csv file.
+    All the measures are stored in the csv file "centrality_measures.csv", stored in the same folder of the adjacency matrix
+    given as input.
 
     Parameters
     ----------
@@ -64,14 +66,12 @@ def centrality_measures(network: str):
     #calculate clustering coefficient and eigenvector centrality using networkx
     G = nx.from_scipy_sparse_array(adjacency_matrix)
     clustering_coefficients = list(nx.clustering(G).values())
-    eigenvector_centrality = list(nx.eigenvector_centrality(G).values())
 
     #calculate mean degree of nearest neighbours
     knn = list(nx.average_neighbor_degree(G).values())
 
     #merge everything in a dataset and save
-    data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, 
-            "Eigenvector_centrality" : eigenvector_centrality, "Mean_degree_NN" : knn}
+    data = {"Degree" : degree_distribution, "Clustering_coefficient" : clustering_coefficients, "Mean_degree_NN" : knn}
     dataset = pd.DataFrame(data = data)
 
     #save dataset in the same folder of the adjacency matrix
@@ -81,11 +81,11 @@ def centrality_measures(network: str):
 def connectivity_between_cathegories():
     '''
     Create a 22 x 22 matrix, where each row and each column represent one of the 22 cathegories of physics papers, and the entries
-    are the number of links in the network between nodes belonging to the two cathegories. So the matrix is symmetric, and the
-    diagonal elements are the links between papers of the same cathegory.
+    are the number of links in the TF-IDF network between nodes belonging to the two cathegories. So the matrix is symmetric, and
+    the diagonal elements are the links between papers of the same cathegory.
 
-    The matrix is saved as a dataset in an external csv file, together with a column representing the number of papers of each
-    cathegory.
+    The matrix is saved as a dataset in the csv file "tf_idf_network/results/connections_between_cathegories.csv", where also 
+    a column representing the number of papers of each cathegory is included.
     '''
     # create the graph and the 22 x 22 matrix
     G = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
@@ -116,16 +116,16 @@ def connectivity_between_cathegories():
 
 def split_fiedler_eigenvector():
     '''
-    Divide the abstract embeddings graph into communities using the sign of the components of the Fiedler eigenvector.
+    Split the abstract embeddings network into communities using the sign of the components of the Fiedler eigenvector.
 
-    During the first iteration, the nodes with degree 0 are removed from the graph. Then the graph is divided into two parts following
+    During the first iteration, the nodes with degree 0 are removed from the graph. Then the network is divided into two parts following
     the signs of the Fiedler eigenvector, and the two induced subgraphs are built from this division.
 
     During the following iterations, the induced subgraph with the higher number of nodes is divided into two more parts following 
     again the signs of the Fiedler eigenvector of that graph. This procedure is repeated until we have a total of 22 subgraphs (same
-    number as the topics of physics papers).
+    number as the topics of Physics papers).
 
-    The list of all subgraphs is saved in an external file.
+    All subgraphs obtained are saved in the Python list "tf_idf_network/results/abstract_embeddings/fiedler_split".
     '''
     full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
 
@@ -147,7 +147,7 @@ def split_fiedler_eigenvector():
     subgraphs_list = []
     G_max = G
     for _ in range(21): #after N iterations we have N+1 subgraphs
-        #create fiedler eigenvector
+        #calculate fiedler eigenvector
         laplacian_matrix = nx.laplacian_matrix(G_max)
         _, evecs = eigsh(laplacian_matrix, k = 2, which ='SM', tol = 1e-6)
         fiedler_vector = evecs[:, 1]
@@ -180,10 +180,11 @@ def split_k_means():
     Split the network built from abstract tf-idf embeddings into clusters using K-Means clustering.
 
     First, the nodes that do not belong to the largest connected component are removed. Then, the first 30 eigenvectors of the
-    Laplacian matrix of the remaining network are calculated and their components used as features for network nodes (30 features for
-    node). After that, a K-Means clustering algorithm (with K = 22) is used to divide the network into 22 clusters.
+    Laplacian matrix of the remaining network are calculated and their components used as features for network nodes (30 features
+    per node). After that, a K-Means clustering algorithm (with K = 22) is used to divide the network into 22 clusters.
 
-    The list of all 22 subgraphs induced with this algorithm is saved in an external file.
+    All subgraphs induced by the division of the network into clusters are saved in the Python list 
+    "tf_idf_network/results/abstract_embeddings/k_means_split".
     '''
     full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
 
@@ -223,13 +224,14 @@ def split_k_means():
 
 def split_louvain_method():
     '''
-    Split the network built from abstract tf-idf embeddings using the Louvain method.
+    Split the network built from abstract tf-idf embeddings using the Louvain algorithm.
 
     First, the nodes that do not belong to the largest connected component are removed. Then, the Louvain method is applied as
     explained in the networkx documentation.
 
-    The list with all subgraphs induced with this algorithm is saved in an external file.
-
+    All subgraphs induced by the division of the network into communities are saved in the Python list 
+    "tf_idf_network/results/abstract_embeddings/louvain_split".
+    
     References
     ----------
         Networkx documentation louvain_communities: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html
@@ -266,10 +268,10 @@ def split_louvain_method():
 
 def cathegories_by_community(split_method: str):
     '''
-    Create a table where each row is one of the communities obtained using the input algorithm, the columns are the cathegories 
+    Create a table where the rows are the communities obtained using the input algorithm, the columns are the cathegories 
     of Physics papers and each entry is the number of papers of a certain cathegory in a certain community.
 
-    The table is saved in a csv file.
+    The table is saved in dedicated csv files, one for each algorithm used to obtain the communities.
 
     Parameters
     ----------

@@ -11,15 +11,18 @@ all_physics_topics = c("Accelerator Physics", "Applied Physics", "Atmospheric an
                         "Physics and Society", "Physics Education", "Plasma Physics", "Popular Physics", "Space Physics")
 
 for(i in (1:22)){
+  #select one of the cathegories
   max_connections_for_topic <- connections_between_cathegories %>%
     select(c("...1", all_physics_topics[i])) %>%
     mutate("Cathegory" = all_physics_topics[i])
 
   colnames(max_connections_for_topic) <- c("Max_connected_cathegory", "Connections", "Cathegory")
+  #select the cathegory with the highest number of connections
   max_connections_for_topic <- max_connections_for_topic %>%
     filter(Connections == max(Connections)) %>%
     select(c("Cathegory", "Max_connected_cathegory", "Connections"))
   
+  #create a unique table
   if(i == 1){
     max_connections <- max_connections_for_topic
   }
