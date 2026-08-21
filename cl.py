@@ -123,7 +123,7 @@ if(__name__ == '__main__'):
 
     parser.add_argument(
         '--community', '-c',
-        dest = 'comunity',
+        dest = 'community',
         required = False,
         action = 'store',
         default = None,

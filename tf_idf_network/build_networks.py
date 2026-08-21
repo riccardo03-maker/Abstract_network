@@ -88,7 +88,7 @@ def pendant_node_removal():
     while in the second case the adjacency matrix of the remaining network is saved in the npz file
     "tf_idf_network/results/abstract_embeddings/abstract_core.npz".
     '''
-    G = nx.from_scipy_sparse_array(load_npz("networks/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    G = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
     nodes_last_iteration = 0
     
     while len(G) != nodes_last_iteration:
