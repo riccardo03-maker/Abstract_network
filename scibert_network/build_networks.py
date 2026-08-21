@@ -53,7 +53,7 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
     return adjacency_matrix
 
 
-def build_scale_free(model: str):
+def build_scale_free():
     '''
     Build a Barabasi-Albert network using the same number of nodes of the network built from the embeddings of the paper titles.
 

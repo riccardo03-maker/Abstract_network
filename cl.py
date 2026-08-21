@@ -2,6 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import subprocess
+from scipy.sparse import save_npz, load_npz
+import networkx as nx
+
+from download.download_papers import download_papers
+from embeddings.embedding_papers import embed_titles_scibert, embed_abstracts_tf_idf
+import tf_idf_network.build_networks as build_tf_idf
+import tf_idf_network.network_analysis as analyze_tf_idf
+import scibert_network.build_networks as build_scibert
+import scibert_network.network_analysis as analyze_scibert
+from tables import tables
 
 __author__= ['Riccardo Grandicelli']
 __email__= ['riccardograndicelli03@gmail.com']
@@ -125,3 +136,145 @@ if(__name__ == '__main__'):
     )
 
     args = parser.parse_args()
+
+
+    if args.download:
+        download_papers()
+
+
+    if args.embed:
+        if args.network == 'tf_idf':
+            embed_abstracts_tf_idf()
+        elif args.network == 'scibert':
+            embed_titles_scibert()
+        else:
+            print("Option --network needed")
+            exit(1)
+
+
+    if args.sweep:
+        if args.network == 'tf_idf':
+            analyze_tf_idf.sweep_connected_components()
+        elif args.network == 'scibert':
+            analyze_scibert.sweep_connected_components()
+        else:
+            print("Option --network needed")
+            exit(1)
+
+
+    if args.build:
+        if args.network == 'tf_idf':
+            adjacency_matrix = build_tf_idf.build_adjacency_matrix(threshold = 0.2)
+            save_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz", matrix = adjacency_matrix.tocsr())
+            analyze_tf_idf.centrality_measures("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz")
+        elif args.network == 'scibert':
+            adjacency_matrix = build_scibert.build_adjacency_matrix(threshold = 0.85)
+            save_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz", matrix = adjacency_matrix.tocsr())
+            analyze_scibert.centrality_measures("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz")
+        else:
+            print("Option --network needed")
+            exit(1)
+
+
+    if args.analysis == 'pendant':
+        if args.network == 'tf_idf':
+            build_tf_idf.pendant_node_removal()
+            G = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_core.npz"))
+            print(len(G))
+        elif args.network == 'scibert':
+            build_scibert.pendant_node_removal()
+            G = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_core.npz"))
+            print(len(G))
+        else:
+            print("Option --network needed")
+            exit(1)
+
+    elif args.analysis == 'scale_free':
+        if args.network == 'tf_idf':
+            build_tf_idf.build_scale_free()
+            analyze_tf_idf.centrality_measures("tf_idf_network/results/scale_free_network/scale_free_network.npz")
+        elif args.network == 'scibert':
+            build_scibert.build_scale_free()
+            analyze_scibert.centrality_measures("scibert_network/results/scale_free_network/scale_free_network.npz")
+        else:
+            print("Option --network needed")
+            exit(1)
+
+    elif args.analysis == 'shuffle':
+        if args.network == 'tf_idf':
+            build_tf_idf.link_shuffling()
+            analyze_tf_idf.centrality_measures("tf_idf_network/results/link_shuffle/link_shuffle.npz")
+        elif args.network == 'scibert':
+            build_scibert.link_shuffling()
+            analyze_scibert.centrality_measures("scibert_network/results/link_shuffle/link_shuffle.npz")
+        else:
+            print("Option --network needed")
+            exit(1)
+
+    elif args.analysis == 'connections':
+        if args.network == 'tf_idf':
+            analyze_tf_idf.connectivity_between_cathegories()
+        elif args.network == 'scibert':
+            analyze_scibert.connectivity_between_cathegories()
+        else:
+            print("Option --network needed")
+            exit(1)
+
+
+    if args.community == 'fiedler':        
+        if args.network == 'tf_idf':
+            analyze_tf_idf.split_fiedler_eigenvector()
+            analyze_tf_idf.cathegories_by_community(split_method = 'fiedler')
+        elif args.network == 'scibert':
+            print("Fiedler algorithm was not implemented for SciBERT network")
+            exit(1)
+        else:
+            print("Option --network needed")
+            exit(1)
+
+    elif args.community == 'kmeans':
+        if args.network == 'tf_idf':
+            analyze_tf_idf.split_k_means()
+            analyze_tf_idf.cathegories_by_community(split_method = 'kmeans')
+        elif args.network == 'scibert':
+            print("K-Means clustering was not implemented for SciBERT network")
+        else:
+            print("Option --network needed")
+            exit(1)
+
+    elif args.community == 'louvain':
+        if args.network == 'tf_idf':
+            analyze_tf_idf.split_louvain_method()
+            analyze_tf_idf.cathegories_by_community(split_method = 'louvain')
+        elif args.network == 'scibert':
+            analyze_scibert.split_louvain_method()
+            analyze_scibert.cathegories_by_community()
+        else:
+            print("Option --network needed")
+            exit(1)
+
+     
+    if args.plot == '1':
+        subprocess.run(["Rscript", "plots/figure_1/figure_1.R"])
+    if args.plot == '2':
+        subprocess.run(["Rscript", "plots/figure_2/figure_2.R"])
+    if args.plot == '3':
+        subprocess.run(["Rscript", "plots/figure_3/figure_3.R"])
+    if args.plot == '4':
+        subprocess.run(["Rscript", "plots/figure_4/figure_4.R"])
+
+
+    if args.table == '1':
+        tables.table_of_cathegories()
+    if args.table == '2':
+        tables.table_connected_components_tf_idf()
+    if args.table == '3':
+        subprocess.run(["Rscript", "tables/table_3.R"])
+    if args.table == '4':
+        tables.table_of_cathegories_by_community_tf_idf()
+    if args.table == '5':
+        tables.table_connected_components_scibert()
+    if args.table == '6':
+        subprocess.run(["Rscript", "tables/table_6.R"])
+    if args.table == '7':
+        tables.table_of_cathegories_by_community_scibert()

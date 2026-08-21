@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from build_networks import build_adjacency_matrix
+from .build_networks import build_adjacency_matrix
 import networkx as nx
 import pandas as pd
 import numpy as np
