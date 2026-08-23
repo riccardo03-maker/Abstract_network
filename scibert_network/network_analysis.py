@@ -27,17 +27,17 @@ def sweep_connected_components():
     '''
     Starting from the embeddings of paper titles using SciBERT, this function builds ten different networks, using as threshold 
     distance five values in the range 0.8-0.9. Then, the number of connected components for each network is calculated, as well as
-    the size of the largest component, and the results stored in a csv file
+    the size of the largest component, and the results stored in the csv file
     "scibert_network/results/title_embeddings/connected_components.csv".
     '''
     connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
     for threshold in np.linspace(start = 0.8, stop = 0.9, num = 5):
         adjacency_matrix = build_adjacency_matrix(threshold = threshold)
-        abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
+        title_network = nx.from_scipy_sparse_array(adjacency_matrix)
     
-        connected_components.loc[len(connected_components)] = [threshold, nx.number_connected_components(abstract_network),
-                                                           max([len(c) for c in list(nx.connected_components(abstract_network))])]
+        connected_components.loc[len(connected_components)] = [threshold, nx.number_connected_components(title_network),
+                                                           max([len(c) for c in list(nx.connected_components(title_network))])]
         print("Iteration")
 
     connected_components.to_csv("scibert_network/results/title_embeddings/connected_components.csv")
@@ -56,7 +56,7 @@ def centrality_measures(network: str):
     Parameters
     ----------
         network: str
-            The path to the file with the adjacency matrix of the network to be analyzed
+            The path to the file with the adjacency matrix of the network to be analyzed.
     '''
     #load network
     adjacency_matrix = load_npz(network)
@@ -116,15 +116,13 @@ def connectivity_between_cathegories():
 
 def split_louvain_method():
     '''
-    Split the network built from title SciBERT embeddings using the Louvain algorithm.
+    Split the network built from titles embeddings using the Louvain algorithm.
 
     First, the nodes that do not belong to the largest connected component are removed. Then, the Louvain method is applied as
     explained in the networkx documentation.
 
-    The list with all subgraphs induced with this algorithm is saved in an external file.
-
     All subgraphs induced by the division of the network into communities are saved in the Python list 
-    "scibert_network/results/abstract_embeddings/louvain_split".
+    "scibert_network/results/title_embeddings/louvain_split".
 
     References
     ----------
@@ -185,7 +183,7 @@ def cathegories_by_community():
             else:
                 list_number_of_papers_per_topic.append(number_of_papers_per_topic[cathegory])
 
-        #put the number of papers of each topic for a community as a row in the dataset
+        #put the number of papers of each topic in a community as a row in the dataset
         cathegories_by_community.loc[len(cathegories_by_community)] = list_number_of_papers_per_topic
 
     cathegories_by_community.to_csv("scibert_network/results/cathegories_by_community_louvain.csv")

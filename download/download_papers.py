@@ -32,6 +32,7 @@ def download_papers():
     papers = pd.DataFrame(columns = ['paper', 'authors', 'title', 'abstract', 'primary_cathegory', 'secondary_cathegory'])
 
     for i in range(13):
+        #open one of the 13 lists of paper IDs
         with open("data/list_of_papers/all_papers_" + str(i) + "_list", 'rb') as file:
             paper_id_list = pickle.load(file)
 

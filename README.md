@@ -59,7 +59,7 @@ options:
                         Only the single plots are created, since the complete figures were built from the single plots
                         using an image editor, and therefore they cannot be re-created using ggplot2.
   --table, -t {1,2,3,4,5,6,7}
-                        The number of the table in the 'tables' folder to re-create
+                        The number of the table in the 'tables' folder to re-create.
   --download, -d        Download authors, titles, abstracts, primary and secondary cathegory of all 25877 papers used
                         for the analysis.
   --network, -n {tf_idf,scibert}
@@ -104,7 +104,7 @@ Each output of the code is saved in a dedicated folder. So, the `cl.py` must alw
 |[scibert_network](https://github.com/riccardo03-maker/Abstract_network/tree/main/scibert_network)|Code and results for the analysis of the network built from SciBERT embeddings|
 |[tables](https://github.com/riccardo03-maker/Abstract_network/tree/main/tables)| All tables used in the report (and the code to re-create them)|
 |[tf_idf_network](https://github.com/riccardo03-maker/Abstract_network/tree/main/tf_idf_network)|Code and results for the analysis of the network built from TF_IDF embeddings|
-|[cl.py](https://github.com/riccardo03-maker/Abstract_network/blob/main/cl.py)| Command line interface to execute all functions in this repository|
+|[cl.py](https://github.com/riccardo03-maker/Abstract_network/blob/main/cl.py)| Command line interface to execute all the code present in this repository|
 
 ## Authors
 

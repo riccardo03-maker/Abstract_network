@@ -43,10 +43,11 @@ if(__name__ == '__main__'):
         required = False,
         action = 'store',
         default = None,
-        help = '''The number of the table in the 'tables' folder to re-create
+        help = '''The number of the table in the 'tables' folder to re-create.
         ''',
         choices = ['1', '2', '3', '4', '5', '6', '7']
     )
+
     parser.add_argument(
         '--download', '-d',
         dest = 'download',

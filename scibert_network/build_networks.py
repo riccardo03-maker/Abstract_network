@@ -32,7 +32,7 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
     Returns
     -------
         adjacency_matrix: scipy.sparse.csr_array
-            The adjacency matrix of the network built from titles SciBERT embeddings
+            The adjacency matrix of the network built from titles embeddings using SciBERT.
     '''
     title_embeddings = np.load("embeddings/title_embeddings_scibert.npz")['arr_0']
     adjacency_matrix = lil_array((title_embeddings.shape[0], title_embeddings.shape[0]), dtype = np.int32)
@@ -45,7 +45,6 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
         #apply the threshold on similarity to create a row of the adjacency matrix
         adjacency_matrix_row = np.array(distance_matrix_row > threshold, dtype = np.int32)
         adjacency_matrix[(i * 113):((i+1) * 113)] = adjacency_matrix_row
-        print(i)
 
     #since the similarity of a vector with itself is always 1, each node in the network has a link with itself (the diagonal elements
     #of the adjacency matrix are all 1). So we set all diagonal elements to 0 to remove these links
@@ -55,7 +54,7 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
 
 def build_scale_free():
     '''
-    Build a Barabasi-Albert network using the same number of nodes of the network built from the embeddings of the paper titles.
+    Build a Barabasi-Albert network using the same number of nodes of the network built from the embeddings of paper titles.
 
     At each time step in the building process a new node is added, and a number links equal to M/N is added to that node, where N
     and M are respectively the number of nodes and the number of links in the SciBERT network. The process is repeated until there
@@ -70,6 +69,7 @@ def build_scale_free():
         Barabasi-Albert algorithm networkx: https://networkx.org/documentation/stable/reference/generated/networkx.generators.random_graphs.barabasi_albert_graph.html
     '''
     starting_network = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz"))
+
     #number of nodes and of links
     N = len(starting_network)
     M = starting_network.size()
@@ -87,7 +87,7 @@ def pendant_node_removal():
     At each iteration, all nodes with degree equal to 0 or 1 are removed from the network. The algorithm is repeated until no node
     remains or until all remaining nodes have degree greater or equal than 2. In the first case, a message tells that nothing has remained,
     while in the second case the adjacency matrix of the remaining network is saved in the npz file
-    "scibert_network/results/title_embeddings/title_core.npz"
+    "scibert_network/results/title_embeddings/title_core.npz".
     '''
     G = nx.from_scipy_sparse_array(load_npz("scibert_network/results/title_embeddings/title_scibert_adjacency_0_85.npz"))
     nodes_last_iteration = 0
@@ -108,7 +108,7 @@ def pendant_node_removal():
 
 def link_shuffling():
     '''
-    Build a new network by randomly swapping the links of the original network built from titles embedded using SciBERT.
+    Build a new network by randomly swapping the links of the original network built from titles embeddings.
 
     The adjacency matrix of the new network is saved in the npz file "scibert_network/results/link_shuffle/link_shuffle.npz".
 

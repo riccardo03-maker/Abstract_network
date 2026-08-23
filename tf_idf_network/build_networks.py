@@ -54,7 +54,7 @@ def build_adjacency_matrix(threshold: float) -> csr_array:
 
 def build_scale_free():
     '''
-    Build a Barabasi-Albert network using the same number of nodes of the network built from the embeddings of the paper abstracts.
+    Build a Barabasi-Albert network using the same number of nodes of the network built from the embeddings of paper abstracts.
 
     At each time step in the building process a new node is added, and a number links equal to M/N is added to that node, where N
     and M are respectively the number of nodes and the number of links in the TF-IDF network. The process is repeated until there
@@ -107,7 +107,7 @@ def pendant_node_removal():
 
 def link_shuffling():
     '''
-    Build a new network by randomly swapping the links of the original network built from abstract tf-idf embeddings.
+    Build a new network by randomly swapping the links of the original network built from abstracts embeddings.
 
     The adjacency matrix of the new network is saved in the npz file "tf_idf_network/results/link_shuffle/link_shuffle.npz".
     
