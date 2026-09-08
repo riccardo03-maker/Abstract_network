@@ -100,6 +100,7 @@ Each output of the code is saved in a dedicated folder. So, the `cl.py` must alw
 | [data](https://github.com/riccardo03-maker/Abstract_network/tree/main/data)| Data on papers used for this project|
 |[download](https://github.com/riccardo03-maker/Abstract_network/tree/main/download)| Python script to download from arXiv the papers used for this project|
 |[embeddings](https://github.com/riccardo03-maker/Abstract_network/tree/main/embeddings)| Embeddings of abstracts/titles using TF-IDF/SciBERT|
+|[extra](https://github.com/riccardo03-maker/Abstract_network/tree/main/extra)| An extension of the project, in which a selection of the TF-IDF components based on entropy is performed|
 |[plots](https://github.com/riccardo03-maker/Abstract_network/tree/main/plots)| All figures used in the report (and the code to re-create them)|
 |[scibert_network](https://github.com/riccardo03-maker/Abstract_network/tree/main/scibert_network)|Code and results for the analysis of the network built from SciBERT embeddings|
 |[tables](https://github.com/riccardo03-maker/Abstract_network/tree/main/tables)| All tables used in the report (and the code to re-create them)|

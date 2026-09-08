@@ -8,5 +8,6 @@ tf_idf_network/__pycache__
 download/__pycache__
 embeddings/__pycache__
 tables/__pycache__
+extra/__pycache__
 .ipynb_checkpoints
 Rplots.pdf
