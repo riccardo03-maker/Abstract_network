@@ -161,7 +161,7 @@ def connectivity_between_cathegories():
     a column representing the number of papers of each cathegory is included.
     '''
     # create the graph and the 22 x 22 matrix
-    G = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    G = nx.from_scipy_sparse_array(load_npz("./results/filtered_adjacency_matrix.npz"))
     connectivity_matrix = np.zeros(shape = (22, 22), dtype = np.int32)
 
     #create list of topics and set them as node attributes
@@ -180,11 +180,12 @@ def connectivity_between_cathegories():
             edges = [edge for edge in list(G.edges) if G.nodes[edge[0]]["Topic"] == first_topic and 
                    G.nodes[edge[1]]["Topic"] == second_topic]
             connectivity_matrix[i][j] = len(edges)
+        print("Iteration")
 
     connections_between_cathegories = pd.DataFrame(data = connectivity_matrix, index = all_physics_topics, columns = all_physics_topics)
     connections_between_cathegories.insert(loc = len(connections_between_cathegories), column = "Number_of_papers",
                                            value = papers_for_cathegory)
-    connections_between_cathegories.to_csv("tf_idf_network/results/connections_between_cathegories.csv")
+    connections_between_cathegories.to_csv("./results/connections_between_cathegories.csv")
 
 
 def split_fiedler_eigenvector():
@@ -198,9 +199,9 @@ def split_fiedler_eigenvector():
     again the signs of the Fiedler eigenvector of that graph. This procedure is repeated until we have a total of 22 subgraphs (same
     number as the topics of Physics papers).
 
-    All subgraphs obtained are saved in the Python list "tf_idf_network/results/abstract_embeddings/fiedler_split".
+    All subgraphs obtained are saved in the Python list "extra/results/fiedler_split".
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("extra/results/filtered_adjacency_matrix.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -244,7 +245,7 @@ def split_fiedler_eigenvector():
     subgraphs_list.append(G_max)
 
     #save the list of subgraphs
-    with open("tf_idf_network/results/abstract_embeddings/fiedler_split", 'wb') as file:
+    with open("extra/results/fiedler_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -257,9 +258,9 @@ def split_k_means():
     per node). After that, a K-Means clustering algorithm (with K = 22) is used to divide the network into 22 clusters.
 
     All subgraphs induced by the division of the network into clusters are saved in the Python list 
-    "tf_idf_network/results/abstract_embeddings/k_means_split".
+    "extra/results/k_means_split".
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("extra/results/filtered_adjacency_matrix.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -291,7 +292,7 @@ def split_k_means():
         subgraphs_list.append(subgraph)
 
     #save the list of subgraphs
-    with open("tf_idf_network/results/abstract_embeddings/k_means_split", 'wb') as file:
+    with open("extra/results/k_means_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -303,13 +304,13 @@ def split_louvain_method():
     explained in the networkx documentation.
 
     All subgraphs induced by the division of the network into communities are saved in the Python list 
-    "tf_idf_network/results/abstract_embeddings/louvain_split".
+    "extra/results/louvain_split".
     
     References
     ----------
         Networkx documentation louvain_communities: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("tf_idf_network/results/abstract_embeddings/abstract_tfidf_adjacency_0_2.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("extra/results/filtered_adjacency_matrix.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -335,7 +336,7 @@ def split_louvain_method():
         subgraphs_list.append(G.subgraph(community).copy())
 
     #save the list of subgraphs
-    with open("tf_idf_network/results/abstract_embeddings/louvain_split", 'wb') as file:
+    with open("extra/results/louvain_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -354,11 +355,11 @@ def cathegories_by_community(split_method: str):
     cathegories_by_community = pd.DataFrame(columns = all_physics_topics)
 
     if split_method == 'fiedler':
-        subgraphs_list_path = "tf_idf_network/results/abstract_embeddings/fiedler_split"
+        subgraphs_list_path = "extra/results/fiedler_split"
     elif split_method == 'kmeans':
-        subgraphs_list_path = "tf_idf_network/results/abstract_embeddings/k_means_split"
+        subgraphs_list_path = "extra/results/k_means_split"
     elif split_method == 'louvain':    
-        subgraphs_list_path = "tf_idf_network/results/abstract_embeddings/louvain_split"
+        subgraphs_list_path = "extra/results/louvain_split"
 
     #load subgraphs
     with open(subgraphs_list_path, "rb") as file:
@@ -379,4 +380,4 @@ def cathegories_by_community(split_method: str):
         #put the number of papers of each topic for a community as a row in the dataset
         cathegories_by_community.loc[len(cathegories_by_community)] = list_number_of_papers_per_topic
 
-    cathegories_by_community.to_csv("tf_idf_network/results/cathegories_by_community_" + split_method + ".csv")
+    cathegories_by_community.to_csv("extra/results/cathegories_by_community_" + split_method + ".csv")
