@@ -381,3 +381,41 @@ def cathegories_by_community(split_method: str):
         cathegories_by_community.loc[len(cathegories_by_community)] = list_number_of_papers_per_topic
 
     cathegories_by_community.to_csv("./results/cathegories_by_community_" + split_method + ".csv")
+
+
+def table_of_papers_by_community():
+    '''
+    Create a table with the number of papers in each community obtained by using both Fiedler eigenvector split and
+    K-Means clustering.
+    '''
+    #open all list of communities obtained with the two algorithms
+    with open("./results/fiedler_split", 'rb') as file:
+        fiedler_subgraphs_list = pickle.load(file)
+    with open("./results/k_means_split", 'rb') as file:
+        kmeans_subgraphs_list = pickle.load(file)
+
+    #count the number of papers in each community for each algorithm
+    fiedler_papers_by_community = [len(community) for community in fiedler_subgraphs_list]
+    kmeans_papers_by_community = [len(community) for community in kmeans_subgraphs_list]
+
+    #create the dataset: each row is a community, and each column is an algorithm
+    papers_by_community_dict = {"Fiedler" : fiedler_papers_by_community, "K_Means": kmeans_papers_by_community}    
+    papers_by_community_data = pd.DataFrame(data = papers_by_community_dict)
+    papers_by_community_data.to_csv("./results/papers_by_community_fiedler_kmeans.csv")
+
+
+def table_of_papers_by_community_louvain():
+    '''
+    Create a table with the number of papers in each community obtained by using the Louvain algorithm.
+    '''
+    #open all list of communities obtained with the Louvain algorithms
+    with open("./results/louvain_split", 'rb') as file:
+        louvain_subgraphs_list = pickle.load(file)
+
+    #count the number of papers in each community
+    louvain_papers_by_community = [len(community) for community in louvain_subgraphs_list]
+
+    #create the dataset
+    papers_by_community_dict = {"Louvain" : louvain_papers_by_community}
+    papers_by_community_data = pd.DataFrame(data = papers_by_community_dict)
+    papers_by_community_data.to_csv("./results/papers_by_community_louvain.csv")
