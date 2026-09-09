@@ -101,7 +101,7 @@ def build_adjacency_matrix(embedding_matrix: csr_array, threshold: float) -> csr
 def sweep_connected_components(embedding_matrix: csr_array):
     '''
     Starting from the embeddings of paper abstracts using tf-idf, filtered on the basis of entropy, this function builds ten different
-    networks, using as threshold distance ten values in the range 0.15-0.5. Then, the number of connected components for each network
+    networks, using as threshold distance ten values in the range 0.5-0.9. Then, the number of connected components for each network
     is calculated, as well as the size of the largest component, and the results stored in the csv file
     "extra/results/connected_components.csv".
 
@@ -112,7 +112,7 @@ def sweep_connected_components(embedding_matrix: csr_array):
     '''
     connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
-    for threshold in np.linspace(start = 0.15, stop = 0.5, num = 10):
+    for threshold in np.linspace(start = 0.1, stop = 0.5, num = 10):
         adjacency_matrix = build_adjacency_matrix(embedding_matrix = embedding_matrix, threshold = threshold)
         abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
     
@@ -127,7 +127,7 @@ def sweep_entropy_threshold():
     '''
     Starting from the embeddings of paper abstracts using tf-idf, this function builds ten different networks, using a threshold 
     distance of 0.2, and keeping only the components of the vector embeddings with an entropy higher than a certain threshold, which
-    is given by ten different values in the range 1-5. Then, the number of embedding vector components remaining is calculated,
+    is given by ten different values in the range 0.5-5. Then, the number of embedding vector components remaining is calculated,
     as well as the number of connected components for each network and the size of the largest component, and the results stored 
     in the csv file "extra/results/connected_components_entropy.csv".    
     '''
@@ -137,9 +137,9 @@ def sweep_entropy_threshold():
     abstract_embeddings = load_npz("../embeddings/abstract_embeddings_tfidf.npz")
     entropy_array = np.load("./entropy_array.npz")['arr_0']
 
-    for threshold in np.linspace(start = 1, stop = 5, num = 10):
+    for threshold in np.linspace(start = 0.5, stop = 5, num = 10):
         #filter the embedding matrix using the entropy vector with the selected threshold
-        embedding_matrix = abstract_embeddings[:, np.where(entropy_array > threshold)[0]]
+        embedding_matrix = abstract_embeddings[:, np.where(entropy_array < threshold)[0]]
 
         adjacency_matrix = build_adjacency_matrix(embedding_matrix = embedding_matrix, threshold = 0.2)
         abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
@@ -201,7 +201,7 @@ def split_fiedler_eigenvector():
 
     All subgraphs obtained are saved in the Python list "extra/results/fiedler_split".
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("extra/results/filtered_adjacency_matrix.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("./results/filtered_adjacency_matrix.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -245,7 +245,7 @@ def split_fiedler_eigenvector():
     subgraphs_list.append(G_max)
 
     #save the list of subgraphs
-    with open("extra/results/fiedler_split", 'wb') as file:
+    with open("./results/fiedler_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -260,7 +260,7 @@ def split_k_means():
     All subgraphs induced by the division of the network into clusters are saved in the Python list 
     "extra/results/k_means_split".
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("extra/results/filtered_adjacency_matrix.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("./results/filtered_adjacency_matrix.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -292,7 +292,7 @@ def split_k_means():
         subgraphs_list.append(subgraph)
 
     #save the list of subgraphs
-    with open("extra/results/k_means_split", 'wb') as file:
+    with open("./results/k_means_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -310,7 +310,7 @@ def split_louvain_method():
     ----------
         Networkx documentation louvain_communities: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.louvain.louvain_communities.html
     '''
-    full_graph = nx.from_scipy_sparse_array(load_npz("extra/results/filtered_adjacency_matrix.npz"))
+    full_graph = nx.from_scipy_sparse_array(load_npz("./results/filtered_adjacency_matrix.npz"))
 
     #create list of topics and set them as node attributes
     topics_list = [all_papers['primary_cathegory'][i] if all_papers['primary_cathegory'][i] in all_physics_topics 
@@ -336,7 +336,7 @@ def split_louvain_method():
         subgraphs_list.append(G.subgraph(community).copy())
 
     #save the list of subgraphs
-    with open("extra/results/louvain_split", 'wb') as file:
+    with open("./results/louvain_split", 'wb') as file:
         pickle.dump(subgraphs_list, file)
 
 
@@ -355,11 +355,11 @@ def cathegories_by_community(split_method: str):
     cathegories_by_community = pd.DataFrame(columns = all_physics_topics)
 
     if split_method == 'fiedler':
-        subgraphs_list_path = "extra/results/fiedler_split"
+        subgraphs_list_path = "./results/fiedler_split"
     elif split_method == 'kmeans':
-        subgraphs_list_path = "extra/results/k_means_split"
+        subgraphs_list_path = "./results/k_means_split"
     elif split_method == 'louvain':    
-        subgraphs_list_path = "extra/results/louvain_split"
+        subgraphs_list_path = "./results/louvain_split"
 
     #load subgraphs
     with open(subgraphs_list_path, "rb") as file:
@@ -380,4 +380,4 @@ def cathegories_by_community(split_method: str):
         #put the number of papers of each topic for a community as a row in the dataset
         cathegories_by_community.loc[len(cathegories_by_community)] = list_number_of_papers_per_topic
 
-    cathegories_by_community.to_csv("extra/results/cathegories_by_community_" + split_method + ".csv")
+    cathegories_by_community.to_csv("./results/cathegories_by_community_" + split_method + ".csv")
