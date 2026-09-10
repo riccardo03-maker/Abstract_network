@@ -26,16 +26,16 @@ all_papers = pd.read_csv("../data/all_papers.csv")
 
 def entropy_component(embedding_matrix: np.ndarray):
     '''
-    Calculate the information entropy of all the columns of the matrix given as input.
+    Calculate the information entropy of all the rows of the matrix given as input.
 
     Parameters
     ----------
         embedding_matrix: np.ndarray
-            The matrix for which we want to calculate the entropy of each column.
+            The matrix for which we want to calculate the entropy of each row.
     Returns
     -------
         entropy: np.ndarray
-            Array of length equal to the number of rows of the input matrix, containing the entropies of all the columns of the
+            Array of length equal to the number of columns of the input matrix, containing the entropies of all the rows of the
             input matrix.
     '''
     #normalize the rows of the matrix so that each row sums up to 1. In this way each element of a row of the matrix is the value
@@ -55,7 +55,7 @@ def entropy_component(embedding_matrix: np.ndarray):
 def build_adjacency_matrix(embedding_matrix: csr_array, threshold: float) -> csr_array:
     '''
     Create an adjacency matrix, starting from distance matrix between abstract embeddings obtained using tf-idf, filtered to keep
-    only the components with an entropy (calculated across all abstracts) higher than a certain threshold.
+    only the components with an entropy (calculated across all abstracts) lower than a certain threshold.
 
     The similarity between vectors representing abstracts is calculated using cosine similarity. Since some components have
     been filtered, the vectors are no more normalized to 1, so we cannot use the scalar product instead.
@@ -101,7 +101,7 @@ def build_adjacency_matrix(embedding_matrix: csr_array, threshold: float) -> csr
 def sweep_connected_components(embedding_matrix: csr_array):
     '''
     Starting from the embeddings of paper abstracts using tf-idf, filtered on the basis of entropy, this function builds ten different
-    networks, using as threshold distance ten values in the range 0.5-0.9. Then, the number of connected components for each network
+    networks, using as threshold distance ten values in the range 0.01-0.5. Then, the number of connected components for each network
     is calculated, as well as the size of the largest component, and the results stored in the csv file
     "extra/results/connected_components.csv".
 
@@ -112,13 +112,12 @@ def sweep_connected_components(embedding_matrix: csr_array):
     '''
     connected_components = pd.DataFrame(columns = ['Threshold', 'Connected_components', 'Largest_component'])
 
-    for threshold in np.linspace(start = 0.1, stop = 0.5, num = 10):
+    for threshold in np.linspace(start = 0.01, stop = 0.5, num = 10):
         adjacency_matrix = build_adjacency_matrix(embedding_matrix = embedding_matrix, threshold = threshold)
         abstract_network = nx.from_scipy_sparse_array(adjacency_matrix)
     
         connected_components.loc[len(connected_components)] = [threshold, nx.number_connected_components(abstract_network),
                                                            max([len(c) for c in list(nx.connected_components(abstract_network))])]
-        print("Iteration")
 
     connected_components.to_csv("./results/connected_components.csv")
 
@@ -126,7 +125,7 @@ def sweep_connected_components(embedding_matrix: csr_array):
 def sweep_entropy_threshold():
     '''
     Starting from the embeddings of paper abstracts using tf-idf, this function builds ten different networks, using a threshold 
-    distance of 0.2, and keeping only the components of the vector embeddings with an entropy higher than a certain threshold, which
+    distance of 0.2, and keeping only the components of the vector embeddings with an entropy lower than a certain threshold, which
     is given by ten different values in the range 0.5-5. Then, the number of embedding vector components remaining is calculated,
     as well as the number of connected components for each network and the size of the largest component, and the results stored 
     in the csv file "extra/results/connected_components_entropy.csv".    
@@ -146,7 +145,6 @@ def sweep_entropy_threshold():
     
         connected_components.loc[len(connected_components)] = [threshold, embedding_matrix.shape[1], nx.number_connected_components(abstract_network),
                                                            max([len(c) for c in list(nx.connected_components(abstract_network))])]
-        print("Iteration")
 
     connected_components.to_csv("./results/connected_components_entropy.csv")
 
@@ -180,7 +178,6 @@ def connectivity_between_cathegories():
             edges = [edge for edge in list(G.edges) if G.nodes[edge[0]]["Topic"] == first_topic and 
                    G.nodes[edge[1]]["Topic"] == second_topic]
             connectivity_matrix[i][j] = len(edges)
-        print("Iteration")
 
     connections_between_cathegories = pd.DataFrame(data = connectivity_matrix, index = all_physics_topics, columns = all_physics_topics)
     connections_between_cathegories.insert(loc = len(connections_between_cathegories), column = "Number_of_papers",
@@ -238,8 +235,6 @@ def split_fiedler_eigenvector():
             G_min = G_max.subgraph(subgraph_1).copy()
             G_max = G_max.subgraph(subgraph_2)
         subgraphs_list.append(G_min)
-
-        print("Iteration")
 
     #append the remaining subgraph to the list of subgraphs
     subgraphs_list.append(G_max)
